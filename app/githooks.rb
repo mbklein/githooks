@@ -1,8 +1,3 @@
-#!/usr/bin/env ruby
-
-require 'rubygems'
-require 'bundler/setup'
-
 class GitHooks < Sinatra::App
   set :root, File.expand_path("../..", __FILE__)
 
