@@ -45,15 +45,11 @@ fi
 git checkout --orphan $BRANCH || exit
 
 modules=`git submodule | cut -d" " -f3`
+git rm -f .gitmodules
 for module in $modules
 do 
   git rm --cached $module
-  mv $module/.git $module/.git.orig.$$
+  rm -rf $module/.git
   git add $module
 done
-git rm .gitmodules
 git commit -m "$COMMITMSG"
-for module in $modules; do
-  mv $module/.git.orig.$$ $module/.git
-done
-

@@ -8,10 +8,11 @@ class GitHooks < Sinatra::Base
       head = payload['head_commit']
       cmds = [
         "cd #{settings.root}/tmp",
-        "git clone #{repo['url']} #{repo['name']}.#{$$}",
+        "git clone --depth 1 #{repo['url']} #{repo['name']}.#{$$}",
         "cd #{repo['name']}.#{$$}",
+        "#{settings.root}/bin/git-shallow-submodule",
         "git checkout #{repo['id']}",
-        "#{settings.root}/bin/git-flatten flat",
+        %{#{settings.root}/bin/git-flatten -m "#{head['message']}" flat},
         "git push -f origin flat:flat",
         "cd ..",
         "rm -rf #{repo['name']}.#{$$}"
