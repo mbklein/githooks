@@ -1,4 +1,4 @@
-class GitHooks < Sinatra::App
+class GitHooks < Sinatra::Base
   set :root, File.expand_path("../..", __FILE__)
 
   post '/avalon-installer' do
