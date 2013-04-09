@@ -13,7 +13,7 @@ class GitHooks < Sinatra::Base
         "git checkout #{repo['id']}",
         "#{settings.root}/bin/git-shallow-submodule",
         %{#{settings.root}/bin/git-flatten -m "#{head['message']}" flat},
-        %{ssh-agent bash -c 'ssh-add $HOME/.ssh/id_github ; git push -f origin flat:flat},
+        %{ssh-agent bash -c 'ssh-add $HOME/.ssh/id_github ; git push -f origin flat:flat'},
         "cd ..",
         "rm -rf #{repo['name']}.#{$$}"
       ]
