@@ -7,32 +7,36 @@ class GitHooks < Sinatra::Base
   set :logging, true
 
   helpers do
-    def ex cmd
+    def ex cmd, ssh=false
+      if ssh
+        keyfile = File.join(settings.root,'config','id_github')
+        cmd = %{ssh-agent bash -c 'ssh-add #{keyfile} ; #{cmd}'}
+      end
       logger.info  ">> #{cmd}"
       resp = %x[#{cmd}]
       resp.split(/\n/).each { |line| logger.debug "<< #{line}" }
     end
   end
 
-  post '/flatten/?:target?' do
+  post '/flatten' do
+    source = params[:source] || 'master'
     target = params[:target] || 'flat'
     payload = params[:payload]
     if payload.is_a?(String)
       payload = JSON.parse(payload)
     end
-    $stderr.puts payload.inspect
 
-    if payload['ref'] == 'refs/heads/master'
+    if payload['ref'] == "refs/heads/#{source}"
       repo = payload['repository']
       head = payload['head_commit']
       Dir.chdir(File.join(settings.root, 'tmp')) do
         repo_dir = SecureRandom.hex
-        ex %{ssh-agent bash -c 'ssh-add $HOME/.ssh/id_github ; git clone --depth 1 git@github.com:#{repo['owner']['name']}/#{repo['name']} #{repo_dir}'}
-        ex "git checkout #{repo['id']}"
+        ex "git clone --depth 1 git@github.com:#{repo['owner']['name']}/#{repo['name']} #{repo_dir}", true
+        ex "git checkout #{source}"
         Dir.chdir(repo_dir) do
           ex %{#{settings.root}/bin/git-shallow-submodule}
           ex %{#{settings.root}/bin/git-flatten -f -m "#{head['message']}" #{target}}
-          ex %{ssh-agent bash -c 'ssh-add $HOME/.ssh/id_github ; git push -f origin #{target}:#{target}'}
+          ex "git push -f origin #{target}:#{target}", true
         end
         FileUtils.rm_rf repo_dir
       end
