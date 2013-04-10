@@ -14,7 +14,8 @@ class GitHooks < Sinatra::Base
     end
   end
 
-  post '/avalon-installer' do
+  post '/flatten/?:target?' do
+    target = params[:target] || 'flat'
     payload = params[:payload]
     if payload.is_a?(String)
       payload = JSON.parse(payload)
@@ -30,8 +31,8 @@ class GitHooks < Sinatra::Base
         ex "git checkout #{repo['id']}"
         Dir.chdir(repo_dir) do
           ex %{#{settings.root}/bin/git-shallow-submodule}
-          ex %{#{settings.root}/bin/git-flatten -f -m "#{head['message']}" flat}
-          ex %{ssh-agent bash -c 'ssh-add $HOME/.ssh/id_github ; git push -f origin flat:flat'}
+          ex %{#{settings.root}/bin/git-flatten -f -m "#{head['message']}" #{target}}
+          ex %{ssh-agent bash -c 'ssh-add $HOME/.ssh/id_github ; git push -f origin #{target}:#{target}'}
         end
         FileUtils.rm_rf repo_dir
       end
