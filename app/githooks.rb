@@ -30,7 +30,7 @@ class GitHooks < Sinatra::Base
         ex "git checkout #{repo['id']}"
         Dir.chdir(repo_dir) do
           ex %{#{settings.root}/bin/git-shallow-submodule}
-          ex %{#{settings.root}/bin/git-flatten -m "#{head['message']}" flat}
+          ex %{#{settings.root}/bin/git-flatten -f -m "#{head['message']}" flat}
           ex %{ssh-agent bash -c 'ssh-add $HOME/.ssh/id_github ; git push -f origin flat:flat'}
         end
         FileUtils.rm_rf repo_dir

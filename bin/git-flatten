@@ -42,7 +42,7 @@ fi
 if [ $FORCE -eq 1 ]; then
   git branch -D $BRANCH > /dev/null 2>&1
 fi
-git checkout --orphan $BRANCH || exit
+git checkout -b $BRANCH || exit
 
 modules=`git submodule | cut -d" " -f3`
 git rm -f .gitmodules
