@@ -31,10 +31,10 @@ class GitHooks < Sinatra::Base
       head = payload['head_commit']
       Dir.chdir(File.join(settings.root, 'tmp')) do
         repo_dir = SecureRandom.hex
-        ex "git clone --depth 1 git@github.com:#{repo['owner']['name']}/#{repo['name']} #{repo_dir}", true
-        ex "git checkout #{source}"
+        ex "git clone --depth 1 --recursive git@github.com:#{repo['owner']['name']}/#{repo['name']} #{repo_dir}", true
         Dir.chdir(repo_dir) do
-          ex %{#{settings.root}/bin/git-shallow-submodule}
+          ex "git checkout #{source}"
+          ex "git submodule update"
           ex %{#{settings.root}/bin/git-flatten -f -m "#{head['message']}" #{target}}
           ex "git push -f origin #{target}:#{target}", true
         end
