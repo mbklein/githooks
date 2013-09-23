@@ -19,14 +19,14 @@ class GitHooks < Sinatra::Base
   end
 
   post '/flatten' do
-    source = params[:source] || 'master'
-    target = params[:target] || 'flat'
-    payload = params[:payload]
-    if payload.is_a?(String)
-      payload = JSON.parse(payload)
-    end
+    if payload['ref'] !~ /\/flat$/
+      source = params[:source] || payload['ref'].split(/\//).last
+      target = params[:target] || "#{source}/flat"
+      payload = params[:payload]
+      if payload.is_a?(String)
+        payload = JSON.parse(payload)
+      end
 
-    if payload['ref'] == "refs/heads/#{source}"
       repo = payload['repository']
       head = payload['head_commit']
       Dir.chdir(File.join(settings.root, 'tmp')) do
