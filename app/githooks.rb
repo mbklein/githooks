@@ -32,9 +32,9 @@ class GitHooks < Sinatra::Base
     if payload.is_a?(String)
       payload = JSON.parse(payload)
     end
-    if payload['ref'] !~ /\/flat$/
+    if payload['ref'] !~ /-flat$/
       source = params[:source] || payload['ref'].split(/\//).last
-      target = params[:target] || "#{source}/flat"
+      target = params[:target] || "#{source}-flat"
 
       repo = payload['repository']
       head = payload['head_commit']
