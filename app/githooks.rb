@@ -3,8 +3,13 @@ require 'securerandom'
 require 'yaml'
 
 class GitHooks < Sinatra::Base
-  set :root, File.expand_path("../..", __FILE__)
-  set :logging, true
+  configure do
+    set :root, File.expand_path("../..", __FILE__)
+    enable :logging
+    file = File.new("#{settings.root}/log/#{settings.environment}.log", 'a+')
+    file.sync = true
+    use Rack::CommonLogger, file
+  end
 
   helpers do
     def ex cmd, ssh=false
@@ -19,6 +24,7 @@ class GitHooks < Sinatra::Base
   end
 
   post '/flatten' do
+    logger.info payload.inspect
     if payload['ref'] !~ /\/flat$/
       source = params[:source] || payload['ref'].split(/\//).last
       target = params[:target] || "#{source}/flat"
